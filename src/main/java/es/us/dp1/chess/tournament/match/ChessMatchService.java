@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.chess.tournament.exceptions.UnfeasibleMatchException;
 import es.us.dp1.chess.tournament.user.User;
 
 @Service
@@ -32,10 +33,15 @@ public class ChessMatchService {
         return repo.findById(id);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = UnfeasibleMatchException.class)
     public ChessMatch save(ChessMatch m) {
-        // TODO: Change to solve exercise 1:
-        return null;
+       if((m.winner == null || (m.winner == m.whitePlayer || m.winner == m.blackPlayer)
+             && (m.finish == null || m.finish.isAfter(m.start)))){
+
+        return repo.save(m);
+       }else{
+        throw new UnfeasibleMatchException("No se puede guardar");
+       }
     }
     
     
